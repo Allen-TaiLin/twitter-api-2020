@@ -49,7 +49,8 @@ module.exports = socket = (httpServer) => {
             return {
               id: m.id,
               name: m.name,
-              avatar: m.avatar
+              avatar: m.avatar,
+              account: '@' + m.account
             }
           })
           socket.emit('receiveUsers', onlineUsers)
