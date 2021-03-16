@@ -19,19 +19,19 @@ module.exports = socket = (httpServer) => {
 
     // 上線事件
     socket.on('sendOnline', (data, err) => {
-      // const socketId = socket.id
+      const socketId = socket.id
       User.findByPk(data.userId)
         .then(user => {
-          const onlineStatus = 'online'
-          user.update({ status: onlineStatus })
+          user.update({ status: 'online', socketId })
             .then(() => {
               const showAccount = '@' + user.account
               const userData = {
-                id: data.userId,
+                id: user.id,
                 name: user.name,
                 avatar: user.avatar,
                 account: showAccount,
-                status: user.status
+                status: user.status,
+                socketId: user.socketId
               }
               socket.broadcast.emit('receiveOnline', userData)
               socket.emit('receiveOnline', userData)
@@ -101,12 +101,11 @@ module.exports = socket = (httpServer) => {
 
 
 
-    // 下線事件
+    // 下線事件（使用者按登出）
     socket.on('sendOffline', (data, err) => {
       User.findByPk(data.userId)
         .then(user => {
-          const offlineStatus = 'offline'
-          user.update({ status: offlineStatus })
+          user.update({ status: 'offline', socketId: null })
             .then(() => {
               // const offlineUser = users.filter((item) => {
               //   return item.id != id
@@ -114,7 +113,8 @@ module.exports = socket = (httpServer) => {
                 id: user.id,
                 name: user.name,
                 avatar: user.avatar,
-                status: user.status
+                status: user.status,
+                socketId: user.socketId
               }
               socket.broadcast.emit('receiveOffline', offlineUser)
               socket.emit('receiveOffline', offlineUser)
@@ -122,8 +122,27 @@ module.exports = socket = (httpServer) => {
             })
         })
     })
-  })
 
+    // 下線事件（使用者沒按登出，直接關掉瀏覽器）
+    socket.on("disconnect", (reason) => {
+      console.log(reason) //離線原因
+      User.findOne({ socketId: socket.id }) //用socketId找誰關掉瀏覽器
+        .then(user => {
+          user.update({ status: 'offline', socketId: null })
+            .then(() => {
+              const offlineUser = {
+                id: user.id,
+                name: user.name,
+                avatar: user.avatar,
+                status: user.status,
+                socketId: user.socketId
+              }
+              socket.broadcast.emit('receiveOffline', offlineUser)
+              socket.emit('receiveOffline', offlineUser)
+            })
+        })
+    })
+  })
 }
 
 
