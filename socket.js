@@ -18,25 +18,25 @@ module.exports = socket = (httpServer) => {
     console.log('a user connected')
 
     //如果重新整理
-    if (socket.request._query[user_id]) {
-      User.findByPk(socket.request._query[user_id])
-        .then(user => {
-          user.update({ status: 'online', socketId })
-            .then(() => {
-              const showAccount = '@' + user.account
-              const userData = {
-                id: user.id,
-                name: user.name,
-                avatar: user.avatar,
-                account: showAccount,
-                status: user.status,
-                socketId: user.socketId
-              }
-              socket.broadcast.emit('receiveOnline', userData)
-              socket.emit('receiveOnline', userData)
-            })
-        })
-    }
+    // if (socket.request._query[user_id]) {
+    //   User.findByPk(socket.request._query[user_id])
+    //     .then(user => {
+    //       user.update({ status: 'online', socketId })
+    //         .then(() => {
+    //           const showAccount = '@' + user.account
+    //           const userData = {
+    //             id: user.id,
+    //             name: user.name,
+    //             avatar: user.avatar,
+    //             account: showAccount,
+    //             status: user.status,
+    //             socketId: user.socketId
+    //           }
+    //           socket.broadcast.emit('receiveOnline', userData)
+    //           socket.emit('receiveOnline', userData)
+    //         })
+    //     })
+    // }
 
     // 上線事件
     socket.on('sendOnline', (data, err) => {
