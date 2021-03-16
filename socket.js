@@ -126,21 +126,24 @@ module.exports = socket = (httpServer) => {
     // 下線事件（使用者沒按登出，直接關掉瀏覽器）
     socket.on("disconnect", (reason) => {
       console.log(reason) //離線原因
-      User.findOne({ socketId: socket.id }) //用socketId找誰關掉瀏覽器
-        .then(user => {
-          user.update({ status: 'offline', socketId: null })
-            .then(() => {
-              const offline = {
-                id: user.id,
-                name: user.name,
-                avatar: user.avatar,
-                status: user.status,
-                socketId: user.socketId
-              }
-              socket.broadcast.emit('receiveOffline', offline)
-              socket.emit('receiveOffline', offline)
-            })
-        })
+      console.log(socket.id)
+      socket.broadcast.emit('receiveOffline', { reason, socketId: socket.id })
+      socket.emit('receiveOffline', { reason, socketId: socket.id })
+      // User.findOne({ socketId: socket.id }) //用socketId找誰關掉瀏覽器
+      //   .then(user => {
+      //     user.update({ status: 'offline', socketId: null })
+      //       .then(() => {
+      //         const offline = {
+      //           id: user.id,
+      //           name: user.name,
+      //           avatar: user.avatar,
+      //           status: user.status,
+      //           socketId: user.socketId
+      //         }
+      //         socket.broadcast.emit('receiveOffline', offline)
+      //         socket.emit('receiveOffline', offline)
+      //       })
+      //   })
     })
   })
 }
