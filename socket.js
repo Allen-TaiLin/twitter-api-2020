@@ -130,15 +130,15 @@ module.exports = socket = (httpServer) => {
         .then(user => {
           user.update({ status: 'offline', socketId: null })
             .then(() => {
-              const offlineUser = {
+              const offline = {
                 id: user.id,
                 name: user.name,
                 avatar: user.avatar,
                 status: user.status,
                 socketId: user.socketId
               }
-              socket.broadcast.emit('receiveOffline', offlineUser)
-              socket.emit('receiveOffline', offlineUser)
+              socket.broadcast.emit('receiveOffline', offline)
+              socket.emit('receiveOffline', offline)
             })
         })
     })
