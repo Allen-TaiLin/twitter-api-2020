@@ -7,10 +7,27 @@ module.exports = socket = (io) => {
   // 公開聊天室
   io.on('connection', (socket) => { // 建立連線
     console.log('a user connected')
-    // console.log(socket.request.session)
-    const session = socket.request.session
-    // session.connections++
-    // session.save()
+    const socketId = socket.id
+    const loginId = socket.request.session.passport.user //透過 session 及 passport 拿到登入者的id
+    // User.findByPk(loginId)
+    //   .then(user => {
+    //     user.update({ status: 'online', socketId })
+    //       .then(() => {
+    //         const showAccount = '@' + user.account
+    //         const userData = {
+    //           id: user.id,
+    //           name: user.name,
+    //           avatar: user.avatar,
+    //           account: showAccount,
+    //           status: user.status,
+    //           socketId: user.socketId,
+    //           passport: socket.request.session.passport,
+    //           passportUser: socket.request.session.passport.user
+    //         }
+    //         socket.broadcast.emit('receiveOnline', userData)
+    //         socket.emit('receiveOnline', userData)
+    //       })
+    //   })
 
 
     //如果重新整理
@@ -18,7 +35,6 @@ module.exports = socket = (io) => {
 
     // 上線事件
     socket.on('sendOnline', (data, err) => {
-      const socketId = socket.id
       User.findByPk(data.userId)
         .then(user => {
           user.update({ status: 'online', socketId })
@@ -125,25 +141,24 @@ module.exports = socket = (io) => {
     })
 
     // 下線事件（使用者沒按登出，直接關掉瀏覽器）
-    socket.on("disconnect", (reason) => {
-      console.log(reason) //離線原因
-      console.log(session.id)
-      User.findOne({ socketId: socket.id }) //用socketId找誰關掉瀏覽器
-        .then(user => {
-          user.update({ status: 'offline', socketId: null })
-            .then(() => {
-              const offline = {
-                id: user.id,
-                name: user.name,
-                avatar: user.avatar,
-                status: user.status,
-                socketId: user.socketId
-              }
-              socket.broadcast.emit('receiveOffline', offline)
-              socket.emit('receiveOffline', offline)
-            })
-        })
-    })
+    // socket.on("disconnect", (reason) => {
+    //   console.log(reason) //離線原因
+    //   User.findOne({ socketId }) //用socketId找誰關掉瀏覽器
+    //     .then(user => {
+    //       user.update({ status: 'offline', socketId: null })
+    //         .then(() => {
+    //           const offline = {
+    //             id: user.id,
+    //             name: user.name,
+    //             avatar: user.avatar,
+    //             status: user.status,
+    //             socketId: user.socketId
+    //           }
+    //           socket.broadcast.emit('receiveOffline', offline)
+    //           socket.emit('receiveOffline', offline)
+    //         })
+    //     })
+    // })
   })
 }
 
