@@ -26,7 +26,8 @@ module.exports = socket = (io) => {
                 avatar: user.avatar,
                 account: showAccount,
                 status: user.status,
-                socketId: user.socketId
+                socketId: user.socketId,
+                session: socket.request.session
               }
               socket.broadcast.emit('receiveOnline', userData)
               socket.emit('receiveOnline', userData)
