@@ -7,7 +7,11 @@ module.exports = socket = (io) => {
   // 公開聊天室
   io.on('connection', (socket) => { // 建立連線
     console.log('a user connected')
-    console.log(socket.request.session)
+    // console.log(socket.request.session)
+    const session = socket.request.session
+    // session.connections++
+    // session.save()
+
 
     //如果重新整理
 
@@ -27,7 +31,8 @@ module.exports = socket = (io) => {
                 account: showAccount,
                 status: user.status,
                 socketId: user.socketId,
-                session: socket.request.session
+                passport: socket.request.session.passport,
+                passportUser: socket.request.session.passport.user
               }
               socket.broadcast.emit('receiveOnline', userData)
               socket.emit('receiveOnline', userData)
@@ -122,6 +127,7 @@ module.exports = socket = (io) => {
     // 下線事件（使用者沒按登出，直接關掉瀏覽器）
     socket.on("disconnect", (reason) => {
       console.log(reason) //離線原因
+      console.log(session.id)
       User.findOne({ socketId: socket.id }) //用socketId找誰關掉瀏覽器
         .then(user => {
           user.update({ status: 'offline', socketId: null })
