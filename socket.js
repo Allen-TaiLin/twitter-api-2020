@@ -2,13 +2,13 @@ const db = require('./models')
 const { PublicMessage, User } = db
 const helpers = require('./_helpers')
 
-module.exports = socket = (io) => {
+module.exports = (io) => {
 
   // 公開聊天室
   io.on('connection', (socket) => { // 建立連線
     console.log('a user connected')
     const socketId = socket.id
-    const loginId = socket.request.session.passport //透過 session 及 passport 拿到登入者的id
+    const loginPassport = socket.request.session.passport //透過 session 及 passport 拿到登入者的id
     // User.findByPk(loginId)
     //   .then(user => {
     //     user.update({ status: 'online', socketId })
@@ -47,7 +47,7 @@ module.exports = socket = (io) => {
                 account: showAccount,
                 status: user.status,
                 socketId: user.socketId,
-                passport: socket.request.session.passport
+                passport: loginPassport
               }
               socket.broadcast.emit('receiveOnline', userData)
               socket.emit('receiveOnline', userData)
