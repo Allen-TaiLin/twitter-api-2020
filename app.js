@@ -14,7 +14,19 @@ const passport = require('./config/passport')
 const flash = require('connect-flash')
 const app = express()
 const httpServer = require('http').createServer(app)
-const port = process.env.PORT || 3000
+const io = require('socket.io')(httpServer, {
+  cors: {
+    // origin: "https://twitter-simple-one.herokuapp.com",
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+})
+// setup session
+const sessionMiddleware = session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false
+})
 
 // cors 的預設為全開放
 app.use(cors())
@@ -25,17 +37,13 @@ app.use(express.json())
 // app.use(bodyParser.json())
 app.use(express.static('public'))
 app.use(methodOverride('_method'))
-// setup session and flash
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false
-}))
+app.use(sessionMiddleware)
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(flash())
 app.use('/upload', express.static(__dirname + '/upload'))
-// 把 req.flash 放到 res.locals 裡面
+
+// 設定CORS、把 req.flash 放到 res.locals 裡面
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", '*')
   res.header("Access-Control-Allow-Credentials", true)
@@ -47,18 +55,17 @@ app.use((req, res, next) => {
   next()
 })
 
-// app.get('/', (req, res) => res.send('Hello World!'))
-// app.get('/', (req, res) => {
-//   res.sendFile(__dirname + '/index.html')
-// })
+io.use((socket, next) => {
+  sessionMiddleware(socket.request, {}, next)
+})
 
-
-module.exports = httpServer.listen(port, () => {
+const port = process.env.PORT || 3000
+httpServer.listen(port, () => {
   console.log(`Example app listening on http://localhost:${port}`)
 })
 
 
-require('./socket')(httpServer)
+require('./socket')(io)
 
 // 引入 routes 並將 app 傳進去，讓 routes 可以用 app 這個物件來指定路由
 require('./routes')(app)  // 把 passport 傳入 routes
