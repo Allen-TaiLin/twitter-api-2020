@@ -8,7 +8,7 @@ module.exports = socket = (io) => {
   io.on('connection', (socket) => { // 建立連線
     console.log('a user connected')
     const socketId = socket.id
-    const loginId = socket.request.session.passport.user //透過 session 及 passport 拿到登入者的id
+    const loginId = socket.request.session.passport //透過 session 及 passport 拿到登入者的id
     // User.findByPk(loginId)
     //   .then(user => {
     //     user.update({ status: 'online', socketId })
@@ -47,8 +47,7 @@ module.exports = socket = (io) => {
                 account: showAccount,
                 status: user.status,
                 socketId: user.socketId,
-                passport: socket.request.session.passport,
-                passportUser: socket.request.session.passport.user
+                passport: socket.request.session.passport
               }
               socket.broadcast.emit('receiveOnline', userData)
               socket.emit('receiveOnline', userData)
